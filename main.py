@@ -19,19 +19,29 @@ bn_date_ques = add_affix(bn_date_q, bn_today_prefixes, date_q_suf)
 en_date_q = ['ইংরেজি তারিখ', 'ইং তারিখ', 'ইংরেজি সন', 'ইংরেজি বর্ষ']
 en_date_ques = add_affix(en_date_q, bn_today_prefixes, date_q_suf)
 
+capital_ques = ['রাজধানীর নাম কি', 'রাজধানী', 'রাজধানীর']
+
 
 class QA:
     def __init__(self, cd):
         self.cd = cd
-        if self.cd in bn_date_ques:
-            self.date_in_bangla()
-        elif self.cd in en_date_ques:
-            self.date_in_english()
-        elif self.cd in questions:
-            self.what_ans()
-        else:
-            playaudio("আমি জানি না")
-            
+
+
+        if 'রাজধানীর নাম কি' in self.cd or 'রাজধানী' in self.cd or 'রাজধানীর' in self.cd:
+            self.country_capital()
+
+        for i in bn_date_ques:
+            if i in self.cd:
+                self.date_in_bangla()
+
+        for i in en_date_ques:
+            if i in self.cd:
+                self.date_in_english()
+
+        for i in questions:
+            if i in self.cd:
+                self.what_ans()
+
 
     def date_in_bangla(self):
         bangla_date = bangla.get_date()
@@ -67,18 +77,31 @@ class QA:
         print(response)
         playaudio(response)
 
+    def country_capital(self):
+        capitals = pd.read_csv('country_capital.csv')
+        country_name = capitals["Country"].to_list()
+        capital_name = capitals['Capital'].to_list()
+
+        ques = add_affix(main=['এর রাজধানীর', 'রাজধানী'], pre=country_name)
+
+        for i in ques:
+            if i in self.cd:
+                matched_country_index = ques.index(i) // 2
+                answer_capital = capital_name[matched_country_index]
+                playaudio(answer_capital)
+
 
 while True:
     r = sr.Recognizer()
     with sr.Microphone() as source:
-        print("Listening...")
-        r.pause_threshold = 1
+        print("listening...")
         audio = r.listen(source)
     try:
         print("Recognizing...")
         query = r.recognize_google(audio, language='bn-BD')
         print(f"User said: {query}\n")
-        QA(query)
+        if ' ' in query:
+            QA(query)
     except Exception as e:
         print(e)
         print("Unable to Recognize your voice.")
