@@ -1,0 +1,6 @@
+gTTS==2.2.1
+bangla==0.0.2
+numpy==1.19.5
+pandas==1.2.1
+playsound==1.2.2
+SpeechRecognition==3.8.1
